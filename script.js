@@ -414,7 +414,7 @@ async function compartilharPdf(btnElement) {
       await navigator.share({
         files: [pdfFile],
         title: `Orçamento ${numDoc} - Prezzoto Martelinho de Ouro`,
-        text: `Olá! Segue em anexo a proposta em PDF da Prezzoto Martelinho de Ouro.`
+        text: `Segue anexo o orçamento em PDF.`
       });
     } else {
       // Fallback para desktop: faz o download automático e orienta o envio
