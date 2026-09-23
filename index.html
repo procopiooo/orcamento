@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerador de Orçamentos | Prezzoto Martelinho de Ouro</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              gold: '#F59E0B',
+              'gold-light': '#FCD34D',
+              'gold-dark': '#B45309',
+              dark: '#0F1117',
+              darker: '#090A0F',
+              card: '#181B23',
+              border: '#282D3D'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Estilos Customizados & Regras de Impressão A4 -->
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="bg-[#0b0c10] text-gray-200 min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-black">
+
+  <!-- ======================================================== -->
+  <!-- BARRA DE NAVEGAÇÃO SUPERIOR (NO-PRINT)                   -->
+  <!-- ======================================================== -->
+  <header class="no-print sticky top-0 z-50 bg-[#12141c]/95 backdrop-blur-md border-b border-[#242838] px-4 lg:px-8 py-3.5 transition-all">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Logotipo e Identificação da Oficina -->
+      <div class="flex items-center gap-3.5">
+        <div class="h-12 w-12 rounded-xl bg-black/60 border border-amber-500/30 flex items-center justify-center p-1.5 shadow-lg shadow-amber-500/5">
+          <img src="./imagem/logo.png" alt="Prezzoto Martelinho de Ouro" class="h-full w-full object-contain" />
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold tracking-tight text-white font-brand">PREZZOTO</h1>
+            <span class="px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">Funilaria & Martelinho</span>
+          </div>
+          <p class="text-xs text-gray-400">Gerador de Orçamentos Profissional</p>
+        </div>
+      </div>
+
+      <!-- Botões de Ação do Cabeçalho -->
+      <div class="flex items-center flex-wrap gap-2.5">
+        
+        <!-- Botão Novo Orçamento (Sempre visível) -->
+        <button type="button" onclick="novoOrcamento()" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-gray-300 bg-[#1c202e] hover:bg-[#252b3d] hover:text-white border border-[#2c3349] rounded-lg transition-all shadow-sm">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          <span>Novo</span>
+        </button>
+
+        <!-- Botão de Voltar para Edição (Exibido apenas na tela de PDF) -->
+        <button type="button" id="navBtnVoltar" onclick="voltarParaEdicao()" class="hidden inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-200 bg-[#1f2436] hover:bg-[#2a3149] border border-[#313955] rounded-lg transition-all shadow-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span>← Voltar e Editar</span>
+        </button>
+
+        <!-- Botão Concluir e Visualizar PDF (Exibido na etapa de preenchimento) -->
+        <button type="button" id="navBtnConcluir" onclick="concluirEVisualizarPDF()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 active:scale-95 rounded-lg transition-all shadow-lg shadow-amber-500/20">
+          <span>Concluir e Ver PDF</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+
+        <!-- Botão Partilhar Orçamento (Exibido na tela de PDF) -->
+        <button type="button" id="navBtnPartilhar" onclick="partilharOrcamento()" class="hidden inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 active:scale-95 rounded-lg transition-all shadow-lg shadow-emerald-950/40 border border-emerald-400/30">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          <span>Partilhar WhatsApp</span>
+        </button>
+
+        <!-- Botão Imprimir / PDF (Exibido na tela de PDF) -->
+        <button type="button" id="navBtnImprimir" onclick="imprimirOrcamento()" class="hidden inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 active:scale-95 rounded-lg transition-all shadow-lg shadow-amber-500/20">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          <span>Imprimir / PDF</span>
+        </button>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- CORPO PRINCIPAL                                          -->
+  <!-- ======================================================== -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 transition-all">
+    
+    <!-- ====================================================== -->
+    <!-- ETAPA 1: FORMULÁRIO DE PREENCHIMENTO                    -->
+    <!-- (Visível inicialmente até o usuário concluir)           -->
+    <!-- ====================================================== -->
+    <div id="formSection" class="space-y-6">
+      
+      <!-- Cabeçalho explicativo da etapa -->
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#23283a] pb-4">
+        <div>
+          <h2 class="text-lg font-bold text-white font-brand flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+            Preenchimento do Orçamento
+          </h2>
+          <p class="text-xs text-gray-400">Preencha os dados abaixo. O documento em formato PDF será gerado ao concluir.</p>
+        </div>
+        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          Passo 1 de 2: Dados do Serviço
+        </span>
+      </div>
+
+      <!-- Bloco 1: Metadados do Orçamento -->
+      <div class="bg-[#141722] border border-[#23283a] rounded-xl p-4 sm:p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[#23283a]">
+          <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            1. Dados do Orçamento
+          </h3>
+          <span class="text-xs text-gray-400">Identificação do Documento</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">Nº Orçamento</label>
+            <input type="text" id="inpNumero" value="#0024" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">Data de Emissão</label>
+            <input type="date" id="inpData" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">Validade da Proposta</label>
+            <div class="relative flex items-center">
+              <input type="number" id="inpValidade" value="15" min="1" max="365" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 pr-12 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+              <span class="absolute right-3 text-xs text-gray-400 pointer-events-none font-medium">dias</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 2: Dados do Cliente -->
+      <div class="bg-[#141722] border border-[#23283a] rounded-xl p-4 sm:p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[#23283a]">
+          <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            2. Dados do Cliente
+          </h3>
+          <span class="text-xs text-gray-400">Destinatário</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-medium text-gray-300 mb-1">Nome do Cliente / Razão Social <span class="text-amber-500">*</span></label>
+            <input type="text" id="inpClienteNome" placeholder="Ex: Roberto Carlos da Silva" value="João Pereira da Silva" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">WhatsApp / Telefone</label>
+            <input type="text" id="inpClienteTelefone" placeholder="(44) 99999-9999" value="(44) 99876-5432" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">CPF / CNPJ</label>
+            <input type="text" id="inpClienteDoc" placeholder="000.000.000-00" value="123.456.789-00" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-medium text-gray-300 mb-1">Cidade / Endereço</label>
+            <input type="text" id="inpClienteEndereco" placeholder="Goioerê - PR" value="Goioerê - PR" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 3: Dados do Veículo -->
+      <div class="bg-[#141722] border border-[#23283a] rounded-xl p-4 sm:p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[#23283a]">
+          <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-2 4m0 0l-2-4m2 4V6a2 2 0 00-2-2H9a2 2 0 00-2 2v12m0 0l2 4m0 0l2-4m-2 4V6"/></svg>
+            3. Dados do Veículo
+          </h3>
+          <span class="text-xs text-gray-400">Veículo em Avaliação</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-medium text-gray-300 mb-1">Modelo / Veículo <span class="text-amber-500">*</span></label>
+            <input type="text" id="inpVeiculoModelo" placeholder="Ex: Toyota Corolla XEi 2.0" value="Toyota Corolla XEi 2.0" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">Placa</label>
+            <input type="text" id="inpVeiculoPlaca" placeholder="ABC-1D23" value="BCK-4E89" oninput="atualizarPreview()" class="w-full uppercase bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">Ano / Modelo</label>
+            <input type="text" id="inpVeiculoAno" placeholder="2022/2023" value="2022/2023" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">Cor do Veículo</label>
+            <input type="text" id="inpVeiculoCor" placeholder="Prata Supernova" value="Prata Supernova" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">KM Atual</label>
+            <input type="text" id="inpVeiculoKm" placeholder="38.450 km" value="38.450 km" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 4: Serviços / Itens do Orçamento -->
+      <div class="bg-[#141722] border border-[#23283a] rounded-xl p-4 sm:p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[#23283a]">
+          <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            4. Serviços & Peças
+          </h3>
+          <span class="text-xs text-gray-400">Discriminação detalhada</span>
+        </div>
+
+        <!-- Inserção rápida de serviços frequentes -->
+        <div>
+          <label class="block text-[11px] font-medium text-gray-400 mb-1.5">Atalhos rápidos para serviços comuns:</label>
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" onclick="adicionarItemRapido('Martelinho de Ouro - Desamassamento sem pintura (Porta Traseira Esq.)', 1, 350)" class="text-[11px] bg-[#1a1e2b] hover:bg-amber-500/20 hover:text-amber-300 text-gray-300 border border-[#2d3348] rounded-md px-2.5 py-1 transition">+ Martelinho Porta</button>
+            <button type="button" onclick="adicionarItemRapido('Martelinho de Ouro - Desamassamento de Capô por granizo', 1, 450)" class="text-[11px] bg-[#1a1e2b] hover:bg-amber-500/20 hover:text-amber-300 text-gray-300 border border-[#2d3348] rounded-md px-2.5 py-1 transition">+ Martelinho Capô</button>
+            <button type="button" onclick="adicionarItemRapido('Recuperação e alinhamento de Para-choque dianteiro', 1, 280)" class="text-[11px] bg-[#1a1e2b] hover:bg-amber-500/20 hover:text-amber-300 text-gray-300 border border-[#2d3348] rounded-md px-2.5 py-1 transition">+ Funilaria Para-choque</button>
+            <button type="button" onclick="adicionarItemRapido('Pintura técnica e acabamento com verniz alto sólido', 1, 550)" class="text-[11px] bg-[#1a1e2b] hover:bg-amber-500/20 hover:text-amber-300 text-gray-300 border border-[#2d3348] rounded-md px-2.5 py-1 transition">+ Pintura Técnica</button>
+            <button type="button" onclick="adicionarItemRapido('Polimento técnico e proteção da peça recuperada', 1, 150)" class="text-[11px] bg-[#1a1e2b] hover:bg-amber-500/20 hover:text-amber-300 text-gray-300 border border-[#2d3348] rounded-md px-2.5 py-1 transition">+ Polimento Técnico</button>
+          </div>
+        </div>
+
+        <!-- Lista dinâmica de itens -->
+        <div id="listaItensForm" class="space-y-3">
+          <!-- Renderizado via script.js -->
+        </div>
+
+        <button type="button" onclick="adicionarNovoItem()" class="w-full py-2.5 border border-dashed border-amber-500/40 hover:border-amber-500 bg-amber-500/5 hover:bg-amber-500/10 text-amber-400 text-xs font-semibold rounded-lg flex items-center justify-center gap-2 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+          Adicionar Novo Serviço / Peça
+        </button>
+      </div>
+
+      <!-- Bloco 5: Condições, Prazos & Observações -->
+      <div class="bg-[#141722] border border-[#23283a] rounded-xl p-4 sm:p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[#23283a]">
+          <h3 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            5. Pagamento, Prazos & Observações
+          </h3>
+          <span class="text-xs text-gray-400">Condições Comerciais</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">Forma de Pagamento</label>
+            <input type="text" id="inpPagamento" value="PIX / Cartão em até 10x sem juros" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">Prazo de Execução</label>
+            <input type="text" id="inpPrazo" value="2 a 3 dias úteis após aprovação" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-300 mb-1">Desconto Especial (R$)</label>
+            <input type="number" id="inpDesconto" value="0" min="0" step="10" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition" />
+          </div>
+          <div class="sm:col-span-3">
+            <label class="block text-xs font-medium text-gray-300 mb-1">Observações Técnicas / Laudo de Vistoria</label>
+            <textarea id="inpObservacoes" rows="3" oninput="atualizarPreview()" class="w-full bg-[#0d0f17] border border-[#292f44] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition">Preservação integral da originalidade da pintura de fábrica. Não há necessidade de substituição de componentes estruturais. Veículo liberado para polimento final após conferência das lâmpadas de reflexão.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botão de Ação ao Final do Formulário -->
+      <div class="pt-2 pb-8 flex flex-wrap items-center justify-between gap-3 border-t border-[#23283a]">
+        <button type="button" onclick="novoOrcamento()" class="px-4 py-2.5 text-xs font-medium text-gray-400 hover:text-white bg-[#151824] hover:bg-[#1f2436] border border-[#282f45] rounded-xl transition">
+          Limpar Rascunho
+        </button>
+
+        <button type="button" onclick="concluirEVisualizarPDF()" class="px-6 py-3.5 text-sm font-bold text-black bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 active:scale-95 rounded-xl transition-all shadow-xl shadow-amber-500/25 flex items-center gap-2.5">
+          <span>Concluir e Visualizar Orçamento (PDF)</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+      </div>
+
+    </div>
+
+
+    <!-- ====================================================== -->
+    <!-- ETAPA 2: VISUALIZAÇÃO DO DOCUMENTO A4 (PDF)            -->
+    <!-- (Aparece apenas quando o usuário termina de preencher) -->
+    <!-- ====================================================== -->
+    <div id="previewSection" class="hidden space-y-5">
+      
+      <!-- Barra de Controle do PDF (Apenas tela, no-print) -->
+      <div class="no-print bg-[#141722] border border-[#262b3c] rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+        <div class="flex items-center gap-3">
+          <button type="button" onclick="voltarParaEdicao()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-200 bg-[#1e2333] hover:bg-[#293046] border border-[#2f374e] rounded-xl transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            <span>← Voltar e Editar</span>
+          </button>
+          <span class="text-xs text-emerald-400 font-medium flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Orçamento gerado e pronto para envio!
+          </span>
+        </div>
+
+        <div class="flex items-center flex-wrap gap-2.5">
+          <button type="button" onclick="partilharOrcamento()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 active:scale-95 rounded-xl transition shadow-lg shadow-emerald-950/40">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            <span>Partilhar WhatsApp</span>
+          </button>
+
+          <button type="button" onclick="imprimirOrcamento()" class="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold text-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 active:scale-95 rounded-xl transition shadow-lg shadow-amber-500/25">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            <span>Imprimir / Salvar em PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- FOLHA A4 DO ORÇAMENTO (DOCUMENTO DE IMPRESSÃO) -->
+      <div id="printArea" class="w-full max-w-[210mm] mx-auto bg-white text-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-200 font-sans text-xs">
+        
+        <!-- CABEÇALHO DO ORÇAMENTO (A4) - Utiliza cabecalho.png como background-image -->
+        <div class="relative w-full overflow-hidden bg-cover bg-center bg-no-repeat"
+             style="background-image: url('./imagem/cabecalho.png'); aspect-ratio: 2000 / 476; min-height: 130px;">
+          <!-- Fallback acessível -->
+          <div class="sr-only">
+            <h2>Prezzoto Martelinho de Ouro</h2>
+            <p>Celso Prezzoto Filho - CNPJ: 58.583.308/0001-97 - Av. Santos Dumont, 100 - Goioerê/PR</p>
+          </div>
+        </div>
+
+        <!-- FAIXA DE METADADOS DO DOCUMENTO -->
+        <div class="bg-gray-900 text-white px-6 py-2.5 flex flex-wrap items-center justify-between border-b border-amber-500/40">
+          <div class="flex items-center gap-4 text-[11px]">
+            <div>
+              <span class="text-amber-400 font-semibold uppercase tracking-wider">Orçamento:</span>
+              <strong id="prevNumeroDoc" class="text-white ml-1 text-sm font-bold">#0024</strong>
+            </div>
+            <span class="text-gray-600">|</span>
+            <div>
+              <span class="text-gray-400">Emissão:</span>
+              <span id="prevDataDoc" class="text-gray-200 font-medium ml-1">22/09/2026</span>
+            </div>
+            <span class="text-gray-600">|</span>
+            <div>
+              <span class="text-gray-400">Validade:</span>
+              <span id="prevValidadeDoc" class="text-amber-400 font-medium ml-1">15 dias</span>
+            </div>
+          </div>
+          <div class="text-[11px] text-gray-400 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+            <span>Goioerê - PR</span>
+          </div>
+        </div>
+
+        <div class="p-6 sm:p-7 space-y-5">
+          
+          <!-- GRID DE INFORMAÇÕES: CLIENTE E VEÍCULO -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Box: Dados do Cliente -->
+            <div class="border border-gray-200 rounded-lg p-3.5 bg-gray-50/70">
+              <div class="flex items-center justify-between mb-2.5 border-b border-gray-200 pb-1.5">
+                <span class="text-[11px] font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+                  Dados do Cliente
+                </span>
+              </div>
+              <div class="space-y-1 text-xs text-gray-700">
+                <p><strong class="text-gray-900 font-semibold">Cliente:</strong> <span id="prevClienteNome">João Pereira da Silva</span></p>
+                <p><strong class="text-gray-900 font-semibold">Telefone/WhatsApp:</strong> <span id="prevClienteTelefone">(44) 99876-5432</span></p>
+                <p><strong class="text-gray-900 font-semibold">CPF/CNPJ:</strong> <span id="prevClienteDoc">123.456.789-00</span></p>
+                <p><strong class="text-gray-900 font-semibold">Cidade/UF:</strong> <span id="prevClienteEndereco">Goioerê - PR</span></p>
+              </div>
+            </div>
+
+            <!-- Box: Dados do Veículo -->
+            <div class="border border-gray-200 rounded-lg p-3.5 bg-gray-50/70">
+              <div class="flex items-center justify-between mb-2.5 border-b border-gray-200 pb-1.5">
+                <span class="text-[11px] font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/><path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7h-3v7h4.05a2.5 2.5 0 014.9 0H20a1 1 0 001-1V9.414a1 1 0 00-.293-.707l-3.414-3.414A1 1 0 0016.586 5H14v2z"/></svg>
+                  Dados do Veículo
+                </span>
+                <span id="prevVeiculoPlacaBadge" class="bg-gray-900 text-amber-400 font-mono text-[10px] font-bold px-2 py-0.5 rounded border border-gray-700">BCK-4E89</span>
+              </div>
+              <div class="space-y-1 text-xs text-gray-700">
+                <p><strong class="text-gray-900 font-semibold">Modelo:</strong> <span id="prevVeiculoModelo">Toyota Corolla XEi 2.0</span></p>
+                <div class="grid grid-cols-2 gap-2">
+                  <p><strong class="text-gray-900 font-semibold">Ano/Mod:</strong> <span id="prevVeiculoAno">2022/2023</span></p>
+                  <p><strong class="text-gray-900 font-semibold">Cor:</strong> <span id="prevVeiculoCor">Prata Supernova</span></p>
+                </div>
+                <p><strong class="text-gray-900 font-semibold">KM Atual:</strong> <span id="prevVeiculoKm">38.450 km</span></p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- TABELA DE SERVIÇOS & PEÇAS -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-1.5 h-3.5 bg-amber-500 rounded-sm inline-block"></span>
+                Serviços de Funilaria & Martelinho de Ouro
+              </h3>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg overflow-hidden">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-gray-900 text-white font-semibold text-[11px]">
+                    <th class="py-2.5 px-3 w-10 text-center text-amber-400">Item</th>
+                    <th class="py-2.5 px-3">Descrição do Serviço / Recuperação</th>
+                    <th class="py-2.5 px-3 w-16 text-center">Qtd</th>
+                    <th class="py-2.5 px-3 w-28 text-right">Unitário</th>
+                    <th class="py-2.5 px-3 w-28 text-right">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody id="prevTabelaItens" class="divide-y divide-gray-200 text-gray-800">
+                  <!-- Renderizado via script.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- RESUMO FINANCEIRO E CONDIÇÕES -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start pt-2">
+            
+            <!-- Condições Comerciais -->
+            <div class="md:col-span-7 space-y-2.5 text-xs text-gray-700 bg-gray-50/80 p-3.5 rounded-lg border border-gray-200">
+              <div class="flex items-start gap-2">
+                <span class="font-bold text-gray-900 min-w-[130px]">Forma de Pagamento:</span>
+                <span id="prevCondPagamento">PIX / Cartão em até 10x sem juros</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="font-bold text-gray-900 min-w-[130px]">Prazo de Execução:</span>
+                <span id="prevPrazoEntrega">2 a 3 dias úteis após aprovação</span>
+              </div>
+              <div class="flex items-start gap-2 pt-1 border-t border-gray-200 text-[11px] text-gray-500">
+                <span class="font-semibold text-gray-700">Chave PIX:</span>
+                <span class="font-mono text-gray-800 font-medium">58.583.308/0001-97 (CNPJ)</span>
+              </div>
+            </div>
+
+            <!-- Quadro de Valores / Total -->
+            <div class="md:col-span-5 border border-gray-200 rounded-lg p-3.5 bg-gray-50/80 space-y-2">
+              <div class="flex justify-between text-xs text-gray-600">
+                <span>Subtotal Serviços:</span>
+                <span id="prevSubtotal" class="font-semibold text-gray-900">R$ 0,00</span>
+              </div>
+              <div id="prevLinhaDesconto" class="flex justify-between text-xs text-emerald-600 font-medium">
+                <span>Desconto Aplicado:</span>
+                <span id="prevDesconto">- R$ 0,00</span>
+              </div>
+              <div class="border-t border-gray-300 pt-2 flex justify-between items-center">
+                <span class="text-xs uppercase font-bold text-gray-900">Total do Orçamento:</span>
+                <span id="prevTotalGeral" class="text-base font-extrabold text-amber-600 font-brand">R$ 0,00</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- OBSERVAÇÕES TÉCNICAS E LAUDO -->
+          <div class="border border-gray-200 rounded-lg p-3 bg-white text-[11px] text-gray-600 space-y-1">
+            <strong class="text-gray-900 font-semibold block uppercase tracking-wider text-[10px]">Observações Técnicas / Laudo de Vistoria:</strong>
+            <p id="prevObservacoes" class="leading-relaxed">
+              Preservação integral da originalidade da pintura de fábrica. Não há necessidade de substituição de componentes estruturais. Veículo liberado para polimento final após conferência das lâmpadas de reflexão.
+            </p>
+          </div>
+
+          <!-- ASSINATURAS (A4 PRINT) -->
+          <div class="pt-6 grid grid-cols-2 gap-8 text-center text-xs">
+            <div class="border-t border-gray-400 pt-2">
+              <p class="font-bold text-gray-900" id="prevAssinaturaCliente">João Pereira da Silva</p>
+              <p class="text-[10px] text-gray-500">Assinatura do Cliente / Autorização</p>
+            </div>
+            <div class="border-t border-gray-400 pt-2">
+              <p class="font-bold text-gray-900">Prezzoto Martelinho de Ouro</p>
+              <p class="text-[10px] text-gray-500">Celso Prezzoto Filho - Responsável Técnico</p>
+            </div>
+          </div>
+
+          <!-- RODAPÉ DA PÁGINA IMPRESSA -->
+          <div class="pt-4 border-t border-gray-200 flex flex-wrap items-center justify-between text-[9px] text-gray-400">
+            <div class="flex items-center gap-2">
+              <img src="./imagem/logo.png" alt="Logo" class="h-4 object-contain opacity-70" />
+              <span>Prezzoto Martelinho de Ouro & Funilaria • CNPJ: 58.583.308/0001-97</span>
+            </div>
+            <div>Avenida Santos Dumont, 100 - Goioerê / PR</div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Barra de Controle Inferior (Facilidade ao rolar a página) -->
+      <div class="no-print flex items-center justify-center gap-3 pt-4 pb-8">
+        <button type="button" onclick="voltarParaEdicao()" class="px-5 py-2.5 text-xs font-semibold text-gray-300 bg-[#161a26] hover:bg-[#202738] border border-[#2b334a] rounded-xl transition">
+          ← Voltar e Ajustar Dados
+        </button>
+        <button type="button" onclick="imprimirOrcamento()" class="px-6 py-2.5 text-xs font-bold text-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition shadow-lg shadow-amber-500/20">
+          Imprimir / Salvar em PDF
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL DE COMPARTILHAMENTO / WHATSAPP                     -->
+  <!-- ======================================================== -->
+  <div id="modalPartilha" class="no-print fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 transition-all">
+    <div class="bg-[#141722] border border-[#2d3348] rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
+      <div class="flex items-center justify-between border-b border-[#24293a] pb-3.5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white font-brand">Partilhar Orçamento</h3>
+            <p class="text-xs text-gray-400">Envie a proposta diretamente ao cliente</p>
+          </div>
+        </div>
+        <button type="button" onclick="fecharModalPartilha()" class="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Preview do Texto que será enviado -->
+      <div>
+        <label class="block text-xs font-medium text-gray-300 mb-1.5">Mensagem Formatada (WhatsApp):</label>
+        <textarea id="txtMensagemWhatsapp" rows="8" readonly class="w-full bg-[#0d0f17] border border-[#272d40] rounded-xl p-3 text-xs font-mono text-gray-300 focus:outline-none focus:border-emerald-500 selection:bg-emerald-500/30"></textarea>
+      </div>
+
+      <!-- Ações do Modal -->
+      <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
+        <button type="button" onclick="copiarMensagemWhatsapp()" id="btnCopiarTexto" class="px-4 py-2 text-xs font-semibold text-gray-300 bg-[#1e2333] hover:bg-[#282f45] border border-[#2f374e] rounded-xl transition flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+          <span id="labelCopiarTexto">Copiar Texto</span>
+        </button>
+        <button type="button" onclick="abrirNoWhatsapp()" class="px-5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition flex items-center gap-2 shadow-lg shadow-emerald-950/50">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          <span>Abrir no WhatsApp</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lógica JavaScript Modular -->
+  <script src="./script.js"></script>
+</body>
+</html>
