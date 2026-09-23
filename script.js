@@ -58,11 +58,13 @@ function concluirEVisualizarPDF() {
   const navBtnVoltar = document.getElementById('navBtnVoltar');
   const navBtnImprimir = document.getElementById('navBtnImprimir');
   const navBtnPartilhar = document.getElementById('navBtnPartilhar');
+  const navBtnPartilharPdf = document.getElementById('navBtnPartilharPdf');
 
   if (navBtnConcluir) navBtnConcluir.classList.add('hidden');
   if (navBtnVoltar) navBtnVoltar.classList.remove('hidden');
   if (navBtnImprimir) navBtnImprimir.classList.remove('hidden');
   if (navBtnPartilhar) navBtnPartilhar.classList.remove('hidden');
+  if (navBtnPartilharPdf) navBtnPartilharPdf.classList.remove('hidden');
 
   // Rola suavemente ao topo para ver o cabeçalho completo
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -86,11 +88,13 @@ function voltarParaEdicao() {
   const navBtnVoltar = document.getElementById('navBtnVoltar');
   const navBtnImprimir = document.getElementById('navBtnImprimir');
   const navBtnPartilhar = document.getElementById('navBtnPartilhar');
+  const navBtnPartilharPdf = document.getElementById('navBtnPartilharPdf');
 
   if (navBtnConcluir) navBtnConcluir.classList.remove('hidden');
   if (navBtnVoltar) navBtnVoltar.classList.add('hidden');
   if (navBtnImprimir) navBtnImprimir.classList.add('hidden');
   if (navBtnPartilhar) navBtnPartilhar.classList.add('hidden');
+  if (navBtnPartilharPdf) navBtnPartilharPdf.classList.add('hidden');
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -344,6 +348,125 @@ function setText(id, valor) {
  */
 function imprimirOrcamento() {
   window.print();
+}
+
+/**
+ * Gera e compartilha o arquivo PDF oficial do orçamento.
+ * Em dispositivos móveis/compatíveis, abre o compartilhamento nativo direto no WhatsApp/Apps.
+ * No desktop, realiza o download automático do arquivo e oferece atalho para o WhatsApp.
+ */
+async function compartilharPdf(btnElement) {
+  const element = document.getElementById('printArea');
+  if (!element) {
+    alert('Erro: Área de impressão não encontrada.');
+    return;
+  }
+
+  // Verifica se o html2pdf está carregado
+  if (typeof html2pdf === 'undefined') {
+    alert('O gerador de PDF ainda está sendo carregado. Por favor, aguarde alguns instantes ou verifique sua conexão.');
+    return;
+  }
+
+  // Nome padronizado e limpo para o arquivo
+  const numDoc = (document.getElementById('inpNumero')?.value || '#0001').replace(/[^a-zA-Z0-9_-]/g, '');
+  const cliNome = (document.getElementById('inpClienteNome')?.value || 'Cliente')
+    .trim()
+    .replace(/[^a-zA-Z0-9À-ÿ\s_-]/g, '')
+    .replace(/\s+/g, '_');
+  const nomeArquivo = `Orcamento_PREZZOTO_${numDoc}_${cliNome}.pdf`;
+
+  // Feedback visual no botão clicado
+  let originalHtml = '';
+  if (btnElement) {
+    originalHtml = btnElement.innerHTML;
+    btnElement.disabled = true;
+    btnElement.innerHTML = `
+      <svg class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span>Gerando PDF...</span>
+    `;
+  }
+
+  try {
+    const opt = {
+      margin:       [4, 4, 4, 4],
+      filename:     nomeArquivo,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { 
+        scale: 2, 
+        useCORS: true, 
+        logging: false,
+        letterRendering: true,
+        scrollY: 0
+      },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // Gera o PDF como Blob
+    const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+    const pdfFile = new File([pdfBlob], nomeArquivo, { type: 'application/pdf' });
+
+    // Testa se o navegador suporta Web Share com arquivos (WhatsApp nativo)
+    if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+      await navigator.share({
+        files: [pdfFile],
+        title: `Orçamento ${numDoc} - Prezzoto Martelinho de Ouro`,
+        text: `Olá! Segue em anexo a proposta em PDF da Prezzoto Martelinho de Ouro.`
+      });
+    } else {
+      // Fallback para desktop: faz o download automático e orienta o envio
+      const downloadUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = nomeArquivo;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
+
+      // Exibe modal informativo
+      const lblArquivo = document.getElementById('lblNomeArquivoPdf');
+      if (lblArquivo) lblArquivo.innerText = nomeArquivo;
+
+      const modalDownload = document.getElementById('modalPdfDownload');
+      if (modalDownload) {
+        modalDownload.classList.remove('hidden');
+        modalDownload.classList.add('flex');
+      }
+    }
+  } catch (erro) {
+    if (erro.name !== 'AbortError') {
+      console.error('Erro ao gerar/compartilhar PDF:', erro);
+      alert('Não foi possível gerar ou compartilhar o PDF: ' + erro.message);
+    }
+  } finally {
+    if (btnElement) {
+      btnElement.disabled = false;
+      btnElement.innerHTML = originalHtml;
+    }
+  }
+}
+
+/**
+ * Fecha o modal de confirmação de PDF baixado
+ */
+function fecharModalPdfDownload() {
+  const modal = document.getElementById('modalPdfDownload');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+/**
+ * Abre o WhatsApp informando que o PDF foi gerado
+ */
+function abrirWhatsAppComAviso() {
+  fecharModalPdfDownload();
+  abrirNoWhatsapp();
 }
 
 /**

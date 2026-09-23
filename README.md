@@ -48,16 +48,21 @@ Este gerador foi concebido como uma aplicação web moderna, reativa e **100% cl
 - Integração de alta fidelidade com os assets da oficina:
   - Banner superior com `cabecalho.png` de alta resolução em proporção exata sem distorção.
   - Logotipo oficial `logo.png` no cabeçalho e rodapé.
-- Barra flutuante de ações no modo visualização: **Imprimir / Salvar PDF**, **Compartilhar no WhatsApp** e **Voltar para Edição**.
+- Barra flutuante de ações no modo visualização: **Partilhar PDF**, **Partilhar WhatsApp**, **Imprimir** e **Voltar para Edição**.
 
-### 4. 📲 Compartilhamento Instantâneo via WhatsApp
+### 4. 📄 Partilha Direta do Arquivo PDF (Web Share API)
+- Geração client-side do arquivo `.pdf` oficial em alta resolução via `html2pdf.js`, nomeado automaticamente com número do orçamento e nome do cliente (ex: `Orcamento_PREZZOTO_#0024_Cliente.pdf`).
+- **Dispositivos Móveis (Android / iOS):** Integração com a **Web Share API nativa** — ao clicar em "Partilhar PDF", abre o menu do sistema e anexa o arquivo PDF diretamente na conversa do WhatsApp, Telegram ou E-mail com apenas um toque!
+- **Ambiente Desktop:** Caso o navegador desktop não suporte anexação nativa de arquivos, o PDF é baixado automaticamente para a pasta Downloads e a aplicação abre um assistente para disparar o WhatsApp Web com o texto de apresentação pronto.
+
+### 5. 📲 Compartilhamento via WhatsApp (Texto Estruturado)
 - Modal de envio rápido gerando automaticamente uma mensagem estruturada e polida com emojis, discriminação de serviços, valores e forma de pagamento.
 - Gera link direto `https://wa.me/` pronto para disparo no WhatsApp Web ou aplicativo mobile.
 
-### 5. 💾 Persistência Local (LocalStorage)
+### 6. 💾 Persistência Local (LocalStorage)
 - Se a página for recarregada ou fechada por engano, os dados preenchidos são restaurados automaticamente pelo navegador.
 
-### 6. ⚡ Zero Dependências e Zero Instalação
+### 7. ⚡ Zero Dependências e Zero Instalação
 - Não requer `npm install`, `node`, `docker` nem back-end. Basta dar um duplo clique em `index.html` em qualquer computador, tablet ou celular.
 
 ---
